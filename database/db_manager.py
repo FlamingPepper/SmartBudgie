@@ -60,7 +60,6 @@ class DatabaseManager:
         conn.close()
 
     def _add_default_categories(self):
-        """Add default categories to database."""
         conn = self._get_connection()
         cursor = conn.cursor()
 
