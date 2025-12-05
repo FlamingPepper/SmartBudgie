@@ -27,16 +27,16 @@ Install required packages:
 
 Run application:
 - Pycharm or other IDE:
-```
-Run main.py
-```
+   ```
+   Run main.py
+   ```
 
 - macOS / Linux:
-```bash
-python3 main.py
-```
+   ```bash
+   python3 main.py
+   ```
 
 - Windows:
-```powershell
-py -3 main.py
-```
+   ```powershell
+   py -3 main.py
+   ```
