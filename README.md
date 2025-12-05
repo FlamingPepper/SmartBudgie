@@ -8,18 +8,6 @@ Python 3.13, SQLite, Tkinter
 
 ## How to setup/run application
 
-(Optional) Create and activate a virtual environment:
-   - macOS / Linux:
-     ```bash
-     python3 -m venv venv
-     source venv/bin/activate
-     ```
-   - Windows (PowerShell):
-     ```powershell
-     python -m venv venv
-     .\venv\Scripts\Activate.ps1
-     ```
-
 Install required packages:
    ```bash
    pip install matplotlib pillow
@@ -28,7 +16,7 @@ Install required packages:
 Run application:
 - Pycharm or other IDE:
    ```
-   Run main.py
+   Run the main.py
    ```
 
 - macOS / Linux:
