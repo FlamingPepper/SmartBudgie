@@ -1,8 +1,8 @@
+import os
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-import os
-from database import DatabaseManager
+
 from models import User
 from utils import validate_username, validate_email, validate_password
 
@@ -20,13 +20,14 @@ class LoginFrame(ttk.Frame):
     def _load_image(self, filename, size=(100, 100)):
         try:
             image_path = os.path.join("images", filename)
-            image = Image. open(image_path)
+            image = Image.open(image_path)
             image = image.resize(size, Image.Resampling.LANCZOS)
             photo = ImageTk.PhotoImage(image)
             self.images[filename] = photo
             return photo
-        except FileNotFoundError:
-            print(f"Image not found: {filename}")
+        except Exception as e:
+            # Print for debugging; fail silently in UI
+            print(f"Could not load image {filename}: {e}")
             return None
 
     def _setup_ui(self):
@@ -38,83 +39,70 @@ class LoginFrame(ttk.Frame):
             image_label = ttk.Label(container, image=budgie_image)
             image_label.pack(pady=(0, 15))
 
-        # Title
         ttk.Label(
             container,
             text="Smart Budgie",
             font=("Helvetica", 24, "bold")
         ).pack(pady=(0, 30))
 
-        # Form frame
         self.form_frame = ttk.Frame(container)
         self.form_frame.pack()
 
-        # Username
         ttk.Label(self.form_frame, text="Username:").pack(anchor="w")
         self.username_entry = ttk.Entry(self.form_frame, width=30)
-        self. username_entry.pack(pady=(5, 15))
+        self.username_entry.pack(pady=(5, 15))
 
-        # Email
-        self. email_label = ttk.Label(self.form_frame, text="Email:")
+        self.email_label = ttk.Label(self.form_frame, text="Email:")
         self.email_entry = ttk.Entry(self.form_frame, width=30)
 
-        # Password
         self.password_label = ttk.Label(self.form_frame, text="Password:")
         self.password_label.pack(anchor="w")
         self.password_entry = ttk.Entry(self.form_frame, width=30, show="*")
-        self.password_entry. pack(pady=(5, 15))
+        self.password_entry.pack(pady=(5, 15))
 
-        # Confirm password
         self.confirm_label = ttk.Label(self.form_frame, text="Confirm Password:")
         self.confirm_entry = ttk.Entry(self.form_frame, width=30, show="*")
 
-        # Error message
         self.error_label = ttk.Label(container, text="", foreground="red")
-        self.error_label. pack(pady=10)
+        self.error_label.pack(pady=10)
 
-        # Buttons
         self.submit_btn = ttk.Button(container, text="Sign In", command=self._handle_submit)
-        self. submit_btn.pack(fill="x", pady=(0, 10))
+        self.submit_btn.pack(fill="x", pady=(0, 10))
 
-        self. toggle_btn = ttk.Button(container, text="Create an account", command=self._toggle_mode)
-        self. toggle_btn.pack(fill="x")
-        self.username_entry. focus()
+        self.toggle_btn = ttk.Button(container, text="Create an account", command=self._toggle_mode)
+        self.toggle_btn.pack(fill="x")
+        self.username_entry.focus()
 
     def _toggle_mode(self):
-        self.is_register_mode = not self. is_register_mode
+        self.is_register_mode = not self.is_register_mode
         self.error_label.config(text="")
 
-        if self. is_register_mode:
-            self. submit_btn.config(text="Create Account")
-            self.toggle_btn. config(text="Already have an account? Sign in")
+        if self.is_register_mode:
+            self.submit_btn.config(text="Create Account")
+            self.toggle_btn.config(text="Already have an account? Sign in")
 
-            # Hide password fields temporarily
-            self. password_label.pack_forget()
+            self.password_label.pack_forget()
             self.password_entry.pack_forget()
 
-            # Show email
             self.email_label.pack(anchor="w")
             self.email_entry.pack(pady=(5, 15))
 
-            # Show password again
             self.password_label.pack(anchor="w")
-            self.password_entry. pack(pady=(5, 15))
+            self.password_entry.pack(pady=(5, 15))
 
-            # Show confirm password
-            self.confirm_label. pack(anchor="w")
-            self. confirm_entry.pack(pady=(5, 15))
+            self.confirm_label.pack(anchor="w")
+            self.confirm_entry.pack(pady=(5, 15))
         else:
-            self.submit_btn. config(text="Sign In")
-            self.toggle_btn. config(text="Create an account")
+            self.submit_btn.config(text="Sign In")
+            self.toggle_btn.config(text="Create an account")
 
             self.email_label.pack_forget()
-            self.email_entry. pack_forget()
+            self.email_entry.pack_forget()
             self.confirm_label.pack_forget()
-            self. confirm_entry. pack_forget()
+            self.confirm_entry.pack_forget()
 
-        # Clear all fields
-        self. username_entry.delete(0, tk. END)
-        self.password_entry. delete(0, tk.END)
+        self.username_entry.delete(0, tk.END)
+        self.password_entry.delete(0, tk.END)
         self.email_entry.delete(0, tk.END)
         self.confirm_entry.delete(0, tk.END)
         self.username_entry.focus()
@@ -126,7 +114,7 @@ class LoginFrame(ttk.Frame):
             self._handle_login()
 
     def _handle_login(self):
-        username = self.username_entry. get().strip()
+        username = self.username_entry.get().strip()
         password = self.password_entry.get()
 
         if not username or not password:
@@ -136,24 +124,24 @@ class LoginFrame(ttk.Frame):
         user = self.db_manager.get_user_by_username(username)
 
         if user is None:
-            self.error_label. config(text="User not found")
+            self.error_label.config(text="User not found")
             return
 
         if not user.verify_password(password):
             self.error_label.config(text="Incorrect password")
             return
 
-        self. on_login_success(user)
+        self.on_login_success(user)
 
     def _handle_register(self):
         username = self.username_entry.get().strip()
-        email = self.email_entry. get().strip()
-        password = self. password_entry.get()
+        email = self.email_entry.get().strip()
+        password = self.password_entry.get()
         confirm = self.confirm_entry.get()
 
         valid, error = validate_username(username)
         if not valid:
-            self.error_label. config(text=error)
+            self.error_label.config(text=error)
             return
 
         valid, error = validate_email(email)
@@ -167,7 +155,7 @@ class LoginFrame(ttk.Frame):
             return
 
         if password != confirm:
-            self. error_label.config(text="Passwords do not match")
+            self.error_label.config(text="Passwords do not match")
             return
 
         if self.db_manager.username_exists(username):
@@ -181,9 +169,9 @@ class LoginFrame(ttk.Frame):
         try:
             user = User(username=username, email=email, password=password)
             self.db_manager.create_user(user)
-            messagebox.showinfo("Success", "Account created!  You can now sign in.")
+            messagebox.showinfo("Success", "Account created! You can now sign in.")
             self._toggle_mode()
             self.username_entry.delete(0, tk.END)
-            self. username_entry.insert(0, username)
+            self.username_entry.insert(0, username)
         except Exception as e:
-            self.error_label. config(text=f"Error: {str(e)}")
+            self.error_label.config(text=f"Error: {str(e)}")
